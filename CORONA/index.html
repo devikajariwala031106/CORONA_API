@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COVID-19 Country Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>COVID-19 Tracker</h1>
+
+        <div class="search-area">
+            <input type="text" id="countryInput" placeholder="Enter country name">
+            <button id="fetchBtn">Get Report</button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const fetchBtn = document.getElementById("fetchBtn");
+        const resultBox = document.getElementById("result");
+
+        function formatNumber(value) {
+            return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        async function fetchCovidData() {
+            const countryName = document.getElementById("countryInput").value.trim();
+
+            if (countryName === "") {
+                alert("Please enter a country name");
+                return;
+            }
+
+            resultBox.innerHTML = "";
+
+            try {
+                const apiURL = `https://disease.sh/v3/covid-19/countries/${countryName}?strict=true`;
+                const response = await fetch(apiURL);
+
+                if (!response.ok) {
+                    throw new Error("Invalid country");
+                }
+
+                const data = await response.json();
+
+                resultBox.innerHTML = `
+                <div class="card">
+                    <h2>${data.country}</h2>
+
+                    <table class="data-table">
+                        <tr>
+                            <td>Total Cases</td>
+                            <td>${formatNumber(data.cases)}</td>
+                        </tr>
+                        <tr>
+                            <td>Today Cases</td>
+                            <td>${formatNumber(data.todayCases)}</td>
+                        </tr>
+                        <tr>
+                            <td>Total Deaths</td>
+                            <td>${formatNumber(data.deaths)}</td>
+                        </tr>
+                        <tr>
+                            <td>Today Deaths</td>
+                            <td>${formatNumber(data.todayDeaths)}</td>
+                        </tr>
+                        <tr>
+                            <td>Recovered</td>
+                            <td>${formatNumber(data.recovered)}</td>
+                        </tr>
+                        <tr>
+                            <td>Active Cases</td>
+                            <td>${formatNumber(data.active)}</td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+            } catch (error) {
+                alert("Unable to fetch data. Please check the country name.");
+            }
+        }
+
+        fetchBtn.addEventListener("click", fetchCovidData);
+    </script>
+
+</body>
+
+</html>
